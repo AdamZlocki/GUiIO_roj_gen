@@ -1,4 +1,4 @@
-from app.utils.utils_functions import plot_results_compare, excel_to_graph
+from app.utils.utils_functions import plot_results_compare, plot_results
 
 
 def main():

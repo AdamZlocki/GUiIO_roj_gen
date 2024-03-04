@@ -9,7 +9,7 @@ from app.classes.graph import GraphMatrix
 from app.classes.vehicle import Vehicle
 from app.classes.vertex import Vertex
 
-path_date = r"dane/Dane_VRP_WT_ST.xlsx"
+path_date = r"../dane/Dane_VRP_WT_ST.xlsx"
 def calc_solution_time(times: dict) -> int:
     """wybiera czas rowiązania na podstawie czasów każdego z pojazdów"""
     return max(times.values())
