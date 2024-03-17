@@ -1,8 +1,7 @@
 class Vehicle:
     """Pojazd reprezentowany przez id i informuje o której może jechać do kolejnego wierzchołka"""
-    def __init__(self, Id, free_at=0):
+    def __init__(self, Id):
         self.Id = Id
-        self.free_at = free_at
 
     def __eq__(self, other):
         if self.Id == other.Id:
@@ -15,6 +14,3 @@ class Vehicle:
 
     def __repr__(self):
         return f"{self.Id}"
-
-    def reset_free_at(self):
-        self.free_at = 0

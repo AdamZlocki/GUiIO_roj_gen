@@ -1,107 +1,107 @@
-from random import choice
+from random import shuffle, sample
 from typing import List, Dict
 
 from app.classes.edge import Edge
 from app.classes.graph import GraphMatrix
 from app.classes.solution import Solution
 from app.classes.vehicle import Vehicle
-from app.utils.utils_functions import all_visited, calc_solution_time, calc_vehicle_time
+from app.utils.utils_functions import calc_solution_time, calc_vehicle_time
 
 
 def find_solution(graph: GraphMatrix, vehicles: List[Vehicle]):
-    """Funkcja do znajdowania losowego rozwiązania w przestrzeni rozwiązań przy założeniu że jest ono dopuszczalane"""
-    routes, edges, currents, times, waiting_times = initialize_data(vehicles)
+    """Funkcja do znajdowania losowego rozwiązania w przestrzeni rozwiązań"""
 
-    while not all_visited(graph):  # pętla wykonywana dopóki nie wszystkie wierzchołki są odwiedzone
-        old_currents = currents.copy()
-        for vehicle in vehicles:
-            if not (currents[vehicle] == 0 and len(routes[vehicle]) > 1):
-                # jeśli trasa jest dłuższa niż 1 wierzchołek i na końcu jest 0 to znaczy że trasa dla tego pojazdu jest już skończona
+    routes, edges, times = initialize_data(vehicles)
+    num_of_vehicles = len(vehicles)
 
-                current = currents[vehicle]
-                neighbour = select_neighbour(current, graph, vehicle, waiting_times)
-                edges[vehicle].append(graph.matrix[current][neighbour])  # aktualizacja tablic dla danego pojazdu
-                routes[vehicle].append(neighbour)
-                currents[vehicle] = neighbour
+    randomized_vertex_list = [idx for idx in range(len(graph.matrix[0]))]  # wymieszanie wszystkich wierzchołków
+    shuffle(randomized_vertex_list)
 
-        if old_currents == currents:  # jeśli nie dodano żadnego nowego punktu na trasach -> reset słowników, czasów
-            # pojazdów i odwiedzenia wierzchołków
-            reset_data(graph, vehicles, routes, edges, currents, times, waiting_times)
+    # stworzenie listy indeksów, w których będziemy dzielić listę wymieszanych wierzchołkow
+    cut_idx = sample(range(1, max(randomized_vertex_list)), num_of_vehicles - 1)
+    cut_idx.sort()
 
-    for vehicle in vehicles:
-        if routes[vehicle][-1] != 0:
+    for idx, vehicle in enumerate(vehicles):
+        # pocięcie listy wierzchołków na ścieżki dla każdego pojazdu
+        if idx == 0:
+            routes[vehicle] += randomized_vertex_list[:cut_idx[idx]]
             routes[vehicle].append(0)
-            edges[vehicle].append(graph.matrix[currents[vehicle]][0])
-            currents[vehicle] = 0
-        times[vehicle] = calc_vehicle_time(graph=graph, routes=routes[vehicle], edges=edges[vehicle],
-                                           waiting_times=waiting_times[vehicle])
+        elif idx == num_of_vehicles - 1:
+            routes[vehicle] += randomized_vertex_list[cut_idx[idx - 1]:]
+            routes[vehicle].append(0)
+        else:
+            routes[vehicle] += randomized_vertex_list[cut_idx[idx - 1]:cut_idx[idx]]
+            routes[vehicle].append(0)
 
-    time = calc_solution_time(times)
+        #  uzupełnienie listy krawędzi dla każdego pojazdu
+        for i in range(1, len(routes[vehicle])):
+            edges[vehicle].append(graph.matrix[routes[vehicle][i - 1]][routes[vehicle][i]])
 
-    solution = Solution(routes=routes, time=time, waiting_times=waiting_times)
+        #  obliczenie czasu podróży dla każdego pojadzu
+        times[vehicle] = calc_vehicle_time(graph=graph, routes=routes[vehicle], edges=edges[vehicle])
 
-    for vertex in graph.list[1:]:  # reset grafu i pojazdów
+    time = calc_solution_time(times)  # obliczenie czasu rozwiązania
+
+    solution = Solution(routes=routes, time=time)
+
+    for vertex in graph.list[1:]:  # reset grafu
         vertex.visited = 0
-    for vehicle in vehicles:
-        vehicle.reset_free_at()
 
     return solution
+
 
 def initialize_data(vehicles):
     routes: Dict[Vehicle, List[int]] = {}
     edges: Dict[Vehicle, List[Edge]] = {}
-    currents: Dict[Vehicle, int] = {}
     times: Dict[Vehicle, float] = {}
-    waiting_times: Dict[Vehicle, Dict[int, float]] = {}
 
     for vehicle in vehicles:
         routes[vehicle] = [0]
         edges[vehicle] = []
-        currents[vehicle] = 0
         times[vehicle] = 0
-        waiting_times[vehicle] = {}
 
-    return routes, edges, currents, times, waiting_times
-def select_neighbour(current, graph, vehicle, waiting_times):
-    neighbours = graph.neighbours(current)  # wyszukanie sąsiadów i usunięcie wierzchołka Bazy
-    if 0 in neighbours:
-        neighbours.remove(0)
+    return routes, edges, times
 
-    neighbours_to_delete = []  # wyszukanie już odwiedzonych sąsiadów lub sąsiadów z niepasującym oknem
-    # czasowym
-    for neigh in neighbours:
-        edge_time = graph.matrix[current][neigh].time
-        neigh_vertex = graph.get_vertex(neigh)
-        time_at_place = vehicle.free_at + edge_time
-        if neigh_vertex.visited == 1 or time_at_place >= neigh_vertex.time_window[1]:
-            neighbours_to_delete.append(neigh)
 
-    for neigh in neighbours_to_delete:  # usunięcie niedozwolonych sąsiadów
-        neighbours.remove(neigh)
+# def select_neighbour(current, graph, vehicle):
+#     neighbours = graph.neighbours(current)  # wyszukanie sąsiadów i usunięcie wierzchołka Bazy
+#     if 0 in neighbours:
+#         neighbours.remove(0)
+#
+#     neighbours_to_delete = []  # wyszukanie już odwiedzonych sąsiadów lub sąsiadów z niepasującym oknem
+#     # czasowym
+#     for neigh in neighbours:
+#         edge_time = graph.matrix[current][neigh].time
+#         neigh_vertex = graph.get_vertex(neigh)
+#         time_at_place = vehicle.free_at + edge_time
+#         if neigh_vertex.visited == 1 or time_at_place >= neigh_vertex.time_window[1]:
+#             neighbours_to_delete.append(neigh)
+#
+#     for neigh in neighbours_to_delete:  # usunięcie niedozwolonych sąsiadów
+#         neighbours.remove(neigh)
+#
+#     if len(neighbours):  # jeśli zostali jeszcze jacyś sąsiedzi wylosowanie nastepnego wierzchołka
+#         neighbour = choice(neighbours)
+#         neigh_vertex = graph.get_vertex(neighbour)
+#         edge_time = graph.matrix[current][neighbour].time
+#         time_at_place = vehicle.free_at + edge_time
+#         # sprawdzenie czy pojazd nie przyjedzie przed rozpoczęciem okna czasowego
+#         if time_at_place < neigh_vertex.time_window[0]:
+#             waiting_times[vehicle][neighbour] = neigh_vertex.time_window[0] - time_at_place
+#         else:
+#             waiting_times[vehicle][neighbour] = 0
+#         graph.get_vertex(neighbour).visited = 1
+#         vehicle.free_at += edge_time + neigh_vertex.service_time + waiting_times[vehicle][neighbour]
+#     else:  # jeśli nie -> wybranie 0 i powrót do bazy
+#         neighbour = 0
+#
+#     return neighbour
 
-    if len(neighbours):  # jeśli zostali jeszcze jacyś sąsiedzi wylosowanie nastepnego wierzchołka
-        neighbour = choice(neighbours)
-        neigh_vertex = graph.get_vertex(neighbour)
-        edge_time = graph.matrix[current][neighbour].time
-        time_at_place = vehicle.free_at + edge_time
-        # sprawdzenie czy pojazd nie przyjedzie przed rozpoczęciem okna czasowego
-        if time_at_place < neigh_vertex.time_window[0]:
-            waiting_times[vehicle][neighbour] = neigh_vertex.time_window[0] - time_at_place
-        else:
-            waiting_times[vehicle][neighbour] = 0
-        graph.get_vertex(neighbour).visited = 1
-        vehicle.free_at += edge_time + neigh_vertex.service_time + waiting_times[vehicle][neighbour]
-    else:  # jeśli nie -> wybranie 0 i powrót do bazy
-        neighbour = 0
 
-    return neighbour
-
-def reset_data(graph, vehicles, routes, edges, currents, times, waiting_times):
-    graph.reset_visited()
-    for vehicle in vehicles:
-        routes[vehicle] = [0]
-        edges[vehicle] = []
-        currents[vehicle] = 0
-        times[vehicle] = 0
-        waiting_times[vehicle] = {}
-        vehicle.reset_free_at()
+# def reset_data(graph, vehicles, routes, edges, times):
+#     graph.reset_visited()
+#     for vehicle in vehicles:
+#         routes[vehicle] = [0]
+#         edges[vehicle] = []
+#         times[vehicle] = 0
+#         vehicle.reset_free_at()

@@ -10,17 +10,20 @@ from app.classes.vehicle import Vehicle
 from app.classes.vertex import Vertex
 
 path_date = r"../dane/Dane_VRP_WT_ST.xlsx"
+
+
 def calc_solution_time(times: dict) -> int:
     """wybiera czas rowiązania na podstawie czasów każdego z pojazdów"""
     return max(times.values())
 
-def calc_vehicle_time(graph: GraphMatrix, routes, edges, waiting_times) -> float:
+
+def calc_vehicle_time(graph: GraphMatrix, routes, edges) -> float:
     """czas = suma czasów serwisu + łączny czas oczekiwania + łączny czas krawędzi (wszystko dla danego pojazdu)"""
     service_times = []
     for vertex_idx in routes:
         vertex = graph.get_vertex(vertex_idx=vertex_idx)
         service_times.append(vertex.service_time)
-    time = sum(service_times) + sum(list(waiting_times.values()))
+    time = sum(service_times)
     for edge in edges:
         time += edge.time
     return round(time, 2)
@@ -60,6 +63,7 @@ def all_visited(graph: GraphMatrix):
             break
     return result
 
+
 def calculate_edge_time(vertex1: Vertex, vertex2: Vertex):
     """zakładamy prędkość 1 kilometr na minutę -> czas [min] = dystans [km]"""
     return round(np.sqrt((vertex2.x - vertex1.x) ** 2 + (vertex2.y - vertex1.y) ** 2), 2)
@@ -72,13 +76,11 @@ def excel_to_graph(path: str, sheet_name: str):
     clients = data.iloc[1:, :]
     graph = GraphMatrix()
     graph.insert_vertex(
-        Vertex(Id=depot['StringID'], x=depot['x'], y=depot['y'], time_window=(depot['ReadyTime'], depot['DueDate']),
-               service_time=depot['ServiceTime'], is_base=True))
+        Vertex(Id=depot['StringID'], x=depot['x'], y=depot['y'], service_time=depot['ServiceTime'], is_base=True))
 
     for client_idx in range(clients.shape[0]):
         client = clients.iloc[client_idx]
         graph.insert_vertex(Vertex(Id=client['StringID'], x=client['x'], y=client['y'],
-                                   time_window=(client['ReadyTime'], client['DueDate']),
                                    service_time=client['ServiceTime']))
 
     for idx, vertex in enumerate(graph.list):
@@ -95,7 +97,7 @@ def excel_to_graph(path: str, sheet_name: str):
 
 def plot_results(sheet_name: str, num_of_vehicles: int, algorithm: str, num_of_runs: int = 20,
                  switch_in_all_routes=False):
-    graph = excel_to_graph(path= path_date,
+    graph = excel_to_graph(path=path_date,
                            sheet_name=sheet_name)
 
     vehicles = []
@@ -123,8 +125,6 @@ def plot_results(sheet_name: str, num_of_vehicles: int, algorithm: str, num_of_r
         multiple_bests.append(bests)
         print(len(multiple_bests))
         graph.reset_visited()
-        for vehicle in vehicles:
-            vehicle.reset_free_at()
 
     # print(f"Średni czas pracy algorytmu: {np.mean(times_measured)}")
 
@@ -173,8 +173,6 @@ def plot_results_compare(sheet_name: str, num_of_vehicles: int, num_of_runs: int
         multiple_bests_bee.append(bests)
         print(f"{len(multiple_bests_bee)}: {sol.time}")
         graph.reset_visited()
-        for vehicle in vehicles:
-            vehicle.reset_free_at()
 
     for bests in multiple_bests_bee:  # w każdym uruchomieniu algorytm może skończyć się w różnej liczbie iteracji więc
         # w celu poprawnego wyroswania średniej trzeba dorównać ilość iteracji do tej największej dopisując wartość
