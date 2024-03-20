@@ -1,11 +1,11 @@
 from random import shuffle, sample
 from typing import List, Dict
 
-from app.classes.edge import Edge
-from app.classes.graph import GraphMatrix
-from app.classes.solution import Solution
-from app.classes.vehicle import Vehicle
-from app.utils.utils_functions import calc_solution_time, calc_vehicle_time
+from classes.edge import Edge
+from classes.graph import GraphMatrix
+from classes.solution import Solution
+from classes.vehicle import Vehicle
+from utils.utils_functions import calc_solution_time, calc_vehicle_time
 
 
 def find_solution(graph: GraphMatrix, vehicles: List[Vehicle]):

@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from app.classes.edge import Edge
-from app.classes.graph import GraphMatrix
-from app.classes.vehicle import Vehicle
-from app.classes.vertex import Vertex
+from classes.edge import Edge
+from classes.graph import GraphMatrix
+from classes.vehicle import Vehicle
+from classes.vertex import Vertex
 
-path_date = r"../dane/Dane_VRP_WT_ST.xlsx"
+path_date = r"./dane/Dane_VRP_WT_ST.xlsx"
 
 
 def calc_solution_time(times: dict) -> int:
@@ -160,7 +160,7 @@ def plot_results_compare(sheet_name: str, num_of_vehicles: int, num_of_runs: int
     times_measured_bee = []
 
     while len(multiple_bests_bee) < num_of_runs:
-        from app.algorithms import bee_algorithm
+        from algorithms import bee_algorithm
         start_time = time.time()
         sol, bests = bee_algorithm.bee_algorythm(graph=graph, vehicles=vehicles, num_of_iterations=num_of_iterations,
                                                  size_of_iteration=20, num_of_elite=3, num_of_bests=5,
