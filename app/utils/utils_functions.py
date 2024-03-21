@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from classes.edge import Edge
-from classes.graph import GraphMatrix
-from classes.vehicle import Vehicle
-from classes.vertex import Vertex
+from app.classes.edge import Edge
+from app.classes.graph import GraphMatrix
+from app.classes.vehicle import Vehicle
+from app.classes.vertex import Vertex
 
-path_date = r"./dane/Dane_VRP_WT_ST.xlsx"
+path_date = r"../dane/Dane_VRP_WT_ST.xlsx"
 
 
 def calc_solution_time(times: dict) -> int:
@@ -17,7 +17,7 @@ def calc_solution_time(times: dict) -> int:
     return max(times.values())
 
 
-def calc_vehicle_time(graph: GraphMatrix, routes, edges) -> float:
+def calc_vehicle_time(graph: GraphMatrix, routes: list[int], edges: list[Edge]) -> int:
     """czas = suma czasów serwisu + łączny czas oczekiwania + łączny czas krawędzi (wszystko dla danego pojazdu)"""
     service_times = []
     for vertex_idx in routes:
@@ -120,6 +120,16 @@ def plot_results(sheet_name: str, num_of_vehicles: int, algorithm: str, num_of_r
                                                      size_of_neighbourhood_best=3, max_LT=2,
                                                      switch_in_all_routes=switch_in_all_routes)
             end_time = time.time()
+        if algorithm == 'ga':
+            from app.algorithms import genetic_algorithm
+
+            start_time = time.time()
+            sol, bests = genetic_algorithm.genetic_algorithm(graph=graph, vehicles=vehicles, number_of_iterations=100,
+                                                             initial_population_size=20, population_size=10,
+                                                             first_selection='rul', second_selection='rank',
+                                                             stop_count=50, mutation='1', mutation_probability=10,
+                                                             max_parental_involvement=50)
+            end_time = time.time()
 
         times_measured.append(end_time - start_time)
         multiple_bests.append(bests)
@@ -160,7 +170,7 @@ def plot_results_compare(sheet_name: str, num_of_vehicles: int, num_of_runs: int
     times_measured_bee = []
 
     while len(multiple_bests_bee) < num_of_runs:
-        from algorithms import bee_algorithm
+        from app.algorithms import bee_algorithm
         start_time = time.time()
         sol, bests = bee_algorithm.bee_algorythm(graph=graph, vehicles=vehicles, num_of_iterations=num_of_iterations,
                                                  size_of_iteration=20, num_of_elite=3, num_of_bests=5,

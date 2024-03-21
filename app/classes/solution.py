@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from classes.vehicle import Vehicle
+from app.classes.vehicle import Vehicle
 
 
 class Solution:

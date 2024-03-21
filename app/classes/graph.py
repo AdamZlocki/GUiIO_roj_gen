@@ -1,7 +1,7 @@
 from typing import List
 
-from classes.edge import Edge
-from classes.vertex import Vertex
+from app.classes.edge import Edge
+from app.classes.vertex import Vertex
 
 
 class GraphMatrix:
