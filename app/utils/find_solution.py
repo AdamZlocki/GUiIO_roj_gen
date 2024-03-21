@@ -10,7 +10,6 @@ from app.utils.utils_functions import calc_solution_time, calc_vehicle_time
 
 def find_solution(graph: GraphMatrix, vehicles: List[Vehicle]):
     """Funkcja do znajdowania losowego rozwiązania w przestrzeni rozwiązań"""
-
     routes, edges, times = initialize_data(vehicles)
     num_of_vehicles = len(vehicles)
 
