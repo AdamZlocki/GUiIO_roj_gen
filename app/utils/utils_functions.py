@@ -4,10 +4,12 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
+
 from app.classes.edge import Edge
 from app.classes.graph import GraphMatrix
 from app.classes.vehicle import Vehicle
 from app.classes.vertex import Vertex
+
 
 path_date = r"../dane/Dane_VRP_WT_ST.xlsx"
 
@@ -121,12 +123,13 @@ def plot_results(sheet_name: str, num_of_vehicles: int, algorithm: str, num_of_r
                                                      switch_in_all_routes=switch_in_all_routes)
             end_time = time.time()
         if algorithm == 'ga':
-            from app.algorithms import genetic_algorithm
+            from app.algorithms.genetic import genetic_algorithm
+            from app.classes.selection import ParentSelection, ChildrenSelection
 
             start_time = time.time()
             sol, bests = genetic_algorithm.genetic_algorithm(graph=graph, vehicles=vehicles, number_of_iterations=100,
                                                              initial_population_size=20, population_size=10,
-                                                             first_selection='rul', second_selection='rank',
+                                                             parent_selection=ParentSelection.Tournament, children_selection=ChildrenSelection.Roulette,
                                                              stop_count=50, mutation='1', mutation_probability=10,
                                                              max_parental_involvement=50)
             end_time = time.time()
