@@ -4,22 +4,20 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-
 from app.classes.edge import Edge
 from app.classes.graph import GraphMatrix
 from app.classes.vehicle import Vehicle
 from app.classes.vertex import Vertex
 
-
 path_date = r"../dane/Dane_VRP_WT_ST.xlsx"
 
 
-def calc_solution_time(times: dict) -> int:
-    """wybiera czas rowiązania na podstawie czasów każdego z pojazdów"""
-    return max(times.values())
-
-
-def calc_vehicle_time(graph: GraphMatrix, routes: list[int], edges: list[Edge]) -> int:
+# def calc_solution_time(times: dict) -> int:
+#     """wybiera czas rowiązania na podstawie czasów każdego z pojazdów"""
+#     return max(times.values())
+#
+#
+def calc_vehicle_time(graph: GraphMatrix, routes, edges) -> float:
     """czas = suma czasów serwisu + łączny czas oczekiwania + łączny czas krawędzi (wszystko dla danego pojazdu)"""
     service_times = []
     for vertex_idx in routes:
