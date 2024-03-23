@@ -9,9 +9,9 @@ def mutation_1(population: list[Solution], probability: float) -> list[Solution]
     lub równa wartości prawdopodobieństwa będącego parametrem wejściowym. Obie
     wartości są znormalizowane do przedziału [0,1]. W tym wariancie mutacja polega
     na wylosowaniu wierzchołka z dowolnego pojazdu i przeniesieniu go na losową pozycję
-    w dowolnym samochodzie (miejsce może nie ulec zmianie). Jedynym ograniczeniem jest sytuacja,
-    gdy byłby to jedyny wierzchołek w danym pojeździe. Wtedy operator mutacji zostaje
-    zastosowany ponownie aż do znalezienia właściwego wierzchołka.
+    w dowolnym pojeździe (miejsce może pozostać to samo). Jedynym problemem może być
+    sytuacja, gdy byłby to jedyny wierzchołek w danym pojeździe, jednakże odpowiednie
+    ograniczenia zabezpieczają algorytm przed wystąpieniem takiej sytuacji.
 
     Args:
         population: Lista osobników powstałych w wyniku zajścia operatora krzyżowania
@@ -68,9 +68,9 @@ def mutation_2(population: list[Solution], probability: float) -> list[Solution]
     lub równa wartości prawdopodobieństwa będącego parametrem wejściowym. Obie
     wartości są znormalizowane do przedziału [0,1]. W tym wariancie mutacja polega
     na "zlepieniu" list wierzchołków dla wszystkich samochodów i rozdzieleniu ich w
-    dowolnych miejscach. Jedynym ograniczeniem jest sytuacja, gdy po zastosowaniu tej
-    operacji jakiś pojazd nie miałby żadnych wierzchołków. Wtedy operator mutacji
-    zostaje zastosowany ponownie aż do znalezienia właściwej kombinacji.
+    dowolnych miejscach. Jedynym problemem może być sytuacja, gdy po zastosowaniu tej
+    operacji jakiś pojazd nie miałby żadnych wierzchołków, jednakże odpowiednie
+    ograniczenia zabezpieczają algorytm przed wystąpieniem takiej sytuacji.
 
     Args:
         population: Lista osobników powstałych w wyniku zajścia operatora krzyżowania
