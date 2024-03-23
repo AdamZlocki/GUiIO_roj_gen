@@ -1,4 +1,4 @@
-from algorithms.genetic.selection import *
+from app.algorithms.genetic.selection import *
 from app.classes.graph import GraphMatrix
 from app.classes.solution import Solution
 from app.classes.vehicle import Vehicle
@@ -132,13 +132,3 @@ def sort_solutions(solutions, size_of_iteration, best):
             best = solutions_sorted[0]
     return solutions_sorted.copy(), best
 
-def crossover(population: list[(Solution, Solution)]) -> list[Solution]:
-    return []
-
-
-def mutation_1(population: list[Solution]) -> list[Solution]:
-    return []
-
-
-def mutation_2(population: list[Solution]) -> list[Solution]:
-    return []
