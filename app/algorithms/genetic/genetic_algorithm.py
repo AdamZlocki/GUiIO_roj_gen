@@ -1,9 +1,11 @@
+from app.algorithms.genetic.crossover import crossover
+from app.algorithms.genetic.mutation import mutation_1, mutation_2
 from app.algorithms.genetic.selection import *
 from app.classes.graph import GraphMatrix
 from app.classes.solution import Solution
 from app.classes.vehicle import Vehicle
 from app.utils.find_solution import find_solution
-from app.utils.utils_functions import calc_vehicle_time, calc_solution_time
+from app.utils.utils_functions import calc_vehicle_time
 from app.classes.selection import ParentSelection, ChildrenSelection
 from copy import deepcopy
 
@@ -67,12 +69,13 @@ def genetic_algorithm(graph: GraphMatrix, vehicles: list[Vehicle], number_of_ite
             else parent_selection_tournament(initial_population, population_size)
 
         #Childrens to lista rozwiązań otrzymana po krzyżowaniu i mutacji
-        childrens = create_initial_population(solutions=[], graph=graph, vehicles=vehicles,
-                                                       size_of_initial_population=initial_population_size)
+        childrens_crossover = crossover(parents)
+        childrens_mutation = mutation_1(childrens_crossover, mutation_probability) if mutation == 1 else mutation_2(childrens_crossover, mutation_probability)
+        childrens = [update_solution_time(solution, graph, solution.routes) for solution in childrens_mutation]
 
 
-        new_generation = children_selection_ranking(last_generation,childrens,population_size, max_parental_involvement) if children_selection == ChildrenSelection.Ranking \
-            else children_selection_roulette(last_generation,childrens,population_size, max_parental_involvement)
+        new_generation = children_selection_ranking(last_generation, childrens, population_size, max_parental_involvement) if children_selection == ChildrenSelection.Ranking \
+            else children_selection_roulette(last_generation, childrens, population_size, max_parental_involvement)
 
 
         #Sprawdzenie z ciekawości najlepszego rozwiązania samych losowo generowanych zbiorów i selekcji
@@ -99,16 +102,16 @@ def create_new_solution(solution: Solution, routes: dict[int:list[int]], operato
         return new_solution
 
 
-def update_solution_time(solution: Solution, graph: GraphMatrix, new_routes: dict[int:list[int]]) -> None:
+def update_solution_time(solution: Solution, graph: GraphMatrix, new_routes: dict[int:list[int]]) -> Solution:
     edges = {vehicle: [] for vehicle in solution.routes.keys()}
     times = {vehicle: 0 for vehicle in solution.routes.keys()}
 
     for idx, vehicle in enumerate(solution.routes.keys()):
-        for i in range(1, len(new_routes[vehicle.Id])):
-            edges[vehicle].append(graph.matrix[new_routes[vehicle.Id][i - 1]][new_routes[vehicle.Id][i]])
-        times[vehicle] = calc_vehicle_time(graph=graph, routes=new_routes[vehicle.Id], edges=edges[vehicle])
-    time = calc_solution_time(times)
-    solution.time = time
+        for i in range(1, len(new_routes[vehicle])):
+            edges[vehicle].append(graph.matrix[new_routes[vehicle][i - 1]][new_routes[vehicle][i]])
+        times[vehicle] = calc_vehicle_time(graph=graph, routes=new_routes[vehicle], edges=edges[vehicle])
+    solution.calc_solution_time(times)
+    return solution
 
 
 # Wzięte z `bee_algorithm.py`
