@@ -172,7 +172,7 @@ def calculate_chromosome_probabilities(population):
            list[float]: Lista prawdopodobieństw chromosomów.
        """
     # Znajdź minimalny czas wykonania i odejmij od niego stałą (żeby najlepsze osobniki miały większą szanse na rozmnożenie)
-    min_val = min(solution.time for solution in population)-60
+    min_val = min(solution.time for solution in population)-100
     # Oblicz sumę odwrotności czasu wykonania (po odjęciu minimalnego czasu)
     sum_time_all = sum(1 / (solution.time-min_val) for solution in population)
     # Oblicz prawdopodobieństwo dla każdego chromosomu

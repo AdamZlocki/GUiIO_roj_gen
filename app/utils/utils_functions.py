@@ -127,8 +127,8 @@ def plot_results(sheet_name: str, num_of_vehicles: int, algorithm: str, num_of_r
             start_time = time.time()
             sol, bests = genetic_algorithm.genetic_algorithm(graph=graph, vehicles=vehicles, number_of_iterations=100,
                                                              initial_population_size=20, population_size=10,
-                                                             parent_selection=ParentSelection.Roulette, children_selection=ChildrenSelection.Ranking,
-                                                             stop_count=50, mutation='1', mutation_probability=10,
+                                                             parent_selection=ParentSelection.Roulette, children_selection=ChildrenSelection.Roulette,
+                                                             stop_count=50, mutation='1', mutation_probability=100,
                                                              max_parental_involvement=50)
             end_time = time.time()
 

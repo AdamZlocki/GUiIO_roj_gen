@@ -43,19 +43,10 @@ def genetic_algorithm(graph: GraphMatrix, vehicles: list[Vehicle], number_of_ite
     initial_population = create_initial_population(solutions=[], graph=graph, vehicles=vehicles,
                                                    size_of_initial_population=initial_population_size)
 
-    # przykładowe użycie funkcji create_new_solution() dla crossover i mutacji - dla crossover powstaje nowe
-    # rozwiązanie, a dla mutacji aktualne rozwiązanie się zmienia - dla mutacji nie trzeba nic robić; dla krzyżowania
-    # wystarczy dodawać nowe rozwiąznia do populacji
 
-
-    # print(f"initial:       {initial_population[0]}")
-    # new_routes = {1: [0, 1, 5, 12, 7, 15, 0], 2: [0, 13, 6, 11, 14, 10, 0], 3: [0, 4, 2, 8, 3, 16, 9, 0]}
-    # new_sol = create_new_solution(initial_population[0], new_routes, 'cross', graph)
-    # print(f"new_sol:       {new_sol}\ninitial after: {initial_population[0]}\n")
-    # print(f"initial:       {initial_population[0]}")
-    # new_routes = {1: [0, 1, 5, 12, 7, 15, 0], 2: [0, 13, 6, 11, 14, 10, 0], 3: [0, 4, 2, 8, 3, 16, 9, 0]}
-    # new_sol = create_new_solution(initial_population[0], new_routes, 'mut', graph)
-    # print(f"new_sol:       {new_sol}\ninitial after: {initial_population[0]}\n")
+    mutation_probability = min(mutation_probability / 100, 1)
+    # TODO Wyrzucić po testowaniu
+    ile_mutacji = 0
 
     stop_con = False
     best_solution = min(initial_population, key=lambda solution: solution.time)
@@ -70,9 +61,18 @@ def genetic_algorithm(graph: GraphMatrix, vehicles: list[Vehicle], number_of_ite
 
         #Childrens to lista rozwiązań otrzymana po krzyżowaniu i mutacji
         childrens_crossover = crossover(parents)
-        childrens_mutation = mutation_1(childrens_crossover, mutation_probability) if mutation == 1 else mutation_2(childrens_crossover, mutation_probability)
-        childrens = [update_solution_time(solution, graph, solution.routes) for solution in childrens_mutation]
+        childrens_mutation = mutation_1(childrens_crossover, mutation_probability) if mutation == "1" else mutation_2(childrens_crossover, mutation_probability)
 
+        # TODO Wyrzucić po testowaniu
+        kasztan = [(children_cross, children_mut) for children_mut, children_cross in zip(childrens_mutation, childrens_crossover) if children_cross != children_mut]
+        if len(kasztan) > 0:
+            for child in kasztan:
+                print(f"Przed: {child[0]}, procent mutacji {mutation_probability*100}")
+                print(f"Po:    {child[1]} \n")
+                ile_mutacji += 1
+
+
+        childrens = [update_solution_time(solution, graph, solution.routes) for solution in childrens_mutation]
 
         new_generation = children_selection_ranking(last_generation, childrens, population_size, max_parental_involvement) if children_selection == ChildrenSelection.Ranking \
             else children_selection_roulette(last_generation, childrens, population_size, max_parental_involvement)
@@ -83,6 +83,11 @@ def genetic_algorithm(graph: GraphMatrix, vehicles: list[Vehicle], number_of_ite
         if local_best.time < best_solution.time:
             best_solution = local_best
         bests.append(local_best.time)
+
+    # TODO Wyrzucić po testowaniu
+    print(f"Tyle mutacji: {ile_mutacji}, procent mutacji {mutation_probability*100}")
+
+
     print(f"Best_solution: {best_solution}")
     return best_solution, bests
 
