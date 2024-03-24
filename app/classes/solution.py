@@ -5,7 +5,7 @@ from app.classes.vehicle import Vehicle
 
 class Solution:
     """Reprezentacja danego rozwiązania - routes to ścieżki przeybywane przez każdy z pojazdów, time to czas przypisany
-    do danego rozwiązania, LT to life time - charakterystyczne dla algorytmu pszczelego i niektórych innych"""
+    do danego rozwiązania"""
     def __init__(self, routes: Dict[Vehicle, List[int]], time: (float, int) = 0.0):
         self.routes = routes  # zakładając, że mamy więcej pojazdów niż 1 - kluczami w słowniku są id pojazdów,
         # a wartościami listy obsłużonych wierzchołków/pokonanych krawędzi
