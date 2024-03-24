@@ -5,16 +5,15 @@ from app.classes.edge import Edge
 from app.classes.graph import GraphMatrix
 from app.classes.solution import Solution
 from app.classes.vehicle import Vehicle
-from app.utils.utils_functions import calc_solution_time, calc_vehicle_time
+from app.utils.utils_functions import calc_vehicle_time
 
 
 def find_solution(graph: GraphMatrix, vehicles: List[Vehicle]):
     """Funkcja do znajdowania losowego rozwiązania w przestrzeni rozwiązań"""
-
     routes, edges, times = initialize_data(vehicles)
     num_of_vehicles = len(vehicles)
 
-    randomized_vertex_list = [idx for idx in range(len(graph.matrix[0]))]  # wymieszanie wszystkich wierzchołków
+    randomized_vertex_list = [idx for idx in range(1, len(graph.matrix[0]))]  # wymieszanie wszystkich wierzchołków
     shuffle(randomized_vertex_list)
 
     # stworzenie listy indeksów, w których będziemy dzielić listę wymieszanych wierzchołkow
@@ -40,9 +39,8 @@ def find_solution(graph: GraphMatrix, vehicles: List[Vehicle]):
         #  obliczenie czasu podróży dla każdego pojadzu
         times[vehicle] = calc_vehicle_time(graph=graph, routes=routes[vehicle], edges=edges[vehicle])
 
-    time = calc_solution_time(times)  # obliczenie czasu rozwiązania
-
-    solution = Solution(routes=routes, time=time)
+    solution = Solution(routes=routes)
+    solution.calc_solution_time(times=times)  # obliczenie czasu rozwiązania
 
     for vertex in graph.list[1:]:  # reset grafu
         vertex.visited = 0
