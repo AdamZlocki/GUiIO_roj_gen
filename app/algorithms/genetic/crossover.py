@@ -26,6 +26,7 @@ def crossover(population: list[(Solution, Solution)]) -> list[Solution]:
         czasem.
 
     """
+
     offspring = []
 
     for parent1, parent2 in population:
@@ -74,9 +75,12 @@ def crossover(population: list[(Solution, Solution)]) -> list[Solution]:
             new_routes[route_to_split] = new_routes[route_to_split][:split_index]
             vehicle_id += 1
 
-        # Create a new Solution object with the new routes for each offspring
-        offspring_solution = Solution(
-            routes={vehicle_id: [0] + route + [0] for vehicle_id, route in new_routes.items()})
+        # Uporządkowanie numerów pojazdów, tak aby stanowiły one sekwencję zaczynającą się od 1
+        renumbered_routes = {vehicle_id: [0] + route + [0] for vehicle_id, route in
+                             enumerate(new_routes.values(), start=1)}
+
+        # Stworzenie obiektu klasy Solution i dodanie go do listy rozwiązań
+        offspring_solution = Solution(routes=renumbered_routes)
         offspring.append(offspring_solution)
 
     return offspring

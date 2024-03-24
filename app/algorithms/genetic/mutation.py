@@ -22,6 +22,7 @@ def mutation_1(population: list[Solution], probability: float) -> list[Solution]
         dany osobnik nie ulega modyfikacji.
 
     """
+
     mutated_population = []
     for solution in population:
         # Sprawdzenie, czy mutacja wystąpi
