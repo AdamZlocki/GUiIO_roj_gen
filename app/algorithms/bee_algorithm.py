@@ -70,6 +70,7 @@ def remove_expired_solutions(solutions, max_LT):
         if solution.LT > max_LT:
             solutions.remove(solution)
     return solutions
+
 def create_initial_solutions(solutions, graph, vehicles, size_of_iteration):
     while len(solutions) < size_of_iteration:  # utworzenie zadanej ilości początkowych rozwiązań
         sol = find_solution(graph=graph, vehicles=vehicles)

@@ -5,9 +5,9 @@ from copy import deepcopy
 import random
 
 
-def dispersal(probability, actual_cockroach: Dict[Vehicle, List[int]], vehicle_order: List[Vehicle]):
+def dispersal(probability, actual_cockroach: Solution, vehicle_order: List[Vehicle]):
     """Wywołanie rozproszenia z zadanym prawdopodobieństwem - Z każdego samochodu bierzemy losowe miasto i zamieniamy je z innym losowym samochodem"""
-    actual_cockroach_copy = deepcopy(actual_cockroach)
+    actual_cockroach_copy = deepcopy(actual_cockroach.routes)
     generated_number = random.uniform(0, 0.99)
     if generated_number < probability:
         moved_elem = set()
@@ -32,9 +32,9 @@ def dispersal(probability, actual_cockroach: Dict[Vehicle, List[int]], vehicle_o
             actual_cockroach_copy[other_vehicle].insert(other_index, random_element)
 
         if are_routes_acceptable(actual_cockroach_copy):
-            return actual_cockroach_copy
+            return Solution(actual_cockroach_copy)
     else:
-        return actual_cockroach_copy
+        return Solution(actual_cockroach_copy)
 
 
 class IncorrectSolutionException(Exception):
