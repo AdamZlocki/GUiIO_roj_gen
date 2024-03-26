@@ -4,7 +4,7 @@ from app.classes.graph import GraphMatrix
 from app.classes.solution import Solution
 from app.classes.vehicle import Vehicle
 from app.utils.find_solution import find_solution
-from app.utils.neigbourhood import neighbourhood
+# from app.utils.neigbourhood import neighbourhood
 
 
 def bee_algorythm(graph: GraphMatrix, vehicles: List[Vehicle], num_of_iterations: int = 10, size_of_iteration: int = 10,
