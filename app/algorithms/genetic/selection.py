@@ -13,8 +13,7 @@ def parent_selection_roulette(population: list[Solution], population_size: int) 
      Returns:
         list[(Solution, Solution)]: Lista par rodziców.
     """
-    # Określenie liczby par rodziców
-    parents_number = math.ceil(population_size / 2)
+
     # Obliczenie prawdopodobieństw chromosomów
     chromosome_probab_all = calculate_chromosome_probabilities(population)
     # Utworzenie słownika indeksów populacji
@@ -24,7 +23,7 @@ def parent_selection_roulette(population: list[Solution], population_size: int) 
     parents = []
     # Słownik indeksów użytych rodziców
     parents_index = {idx:[] for idx in range(len(population))}
-    for _ in range(parents_number):
+    for _ in range(population_size):
         population_normalize = population_normalize_all.copy()
         first_parent_index = np.random.choice(list(population_normalize.keys()), p=chromosome_probab_all)
 
@@ -44,7 +43,7 @@ def parent_selection_roulette(population: list[Solution], population_size: int) 
         # Dodanie indeksu drugiego rodzica do listy użytych indeksów
         parents_index.get(first_parent_index).append(second_parent_index)
         # Dodanie pary rodziców do listy wynikowej
-        parents.append([population_normalize_all[first_parent_index],population_normalize_all[second_parent_index]])
+        parents.append([population_normalize_all[first_parent_index], population_normalize_all[second_parent_index]])
     return parents
 
 
@@ -57,14 +56,13 @@ def parent_selection_tournament(population: list[Solution], population_size: int
         Returns:
             list[(Solution, Solution)]: Lista par rodziców.
     """
-    parents_number = math.ceil(population_size / 2)
     # Utworzenie słownika indeksów populacji
     population_normalize_all = {idx: solution for idx, solution in enumerate(population)}
 
     # Słownik indeksów użytych rodziców
     parents_index = {idx: [] for idx in range(len(population))}
     parents = []
-    for _ in range(parents_number):
+    for _ in range(population_size):
         population_normalize = population_normalize_all.copy()
         # Losowy wybór trzech osobników z populacji
         tournament_pool = np.random.choice(list(population_normalize.keys()), 3)
@@ -104,35 +102,36 @@ def children_selection_roulette(parents: list[Solution], childrens: list[Solutio
         list[Solution]: Nowe pokolenie.
     """
     #Określenie liczby osobników z pokolenia rodzicielskiego
-    parents_number =math.ceil(population_size * max_parental_involvement/100)
-    # Określenie liczby osobników z pokolenia dzieci
-    children_number =   population_size-parents_number
+    parents_number = math.ceil(population_size * max_parental_involvement/100)
+    population = parents + childrens
 
-    # Utworzenie słownika indeksów pokolenia rodzicielskiego
-    parents_normalize = {idx: solution for idx, solution in enumerate(parents)}
-    # Utworzenie słownika indeksów dla pokolenia dzieci
-    childrens_normalize = {idx: solution for idx, solution in enumerate(childrens)}
-
+    # Utworzenie słownika indeksów populacji
+    population_normalize = {idx:((solution,'p') if idx < len(parents) else (solution, 'c')) for idx, solution in enumerate(population)}
     new_generation = []
-
+    i = 0
+    j = 0
+    values = []
     # Wybór osobników z pokolenia rodzicielskiego
-    for _ in range(parents_number):
+    while len(new_generation) < population_size:
         # Obliczenie prawdopodobieństw chromosomów
-        chromosome_probab = calculate_chromosome_probabilities(parents_normalize.values())
-        index = np.random.choice(list(parents_normalize.keys()), p=chromosome_probab)
 
-        # Usunięcie indeksu z pokolenia rodzicielskiego i dodanie do rozwiązania
-        new_generation.append(parents_normalize.pop(index))
-
-    # Wybór osobników spośród dzieci
-    for _ in range(children_number):
-        # Obliczenie prawdopodobieństw chromosomów
-        chromosome_probab = calculate_chromosome_probabilities(childrens_normalize.values())
-        index = np.random.choice(list(childrens_normalize.keys()), p=chromosome_probab)
-
-        # Usunięcie indeksu z pokolenia dzieci i dodanie do rozwiązania
-        new_generation.append(childrens_normalize.pop(index))
-
+        chromosome_probab = calculate_chromosome_probabilities([tuple[0] for tuple in list(population_normalize.values())])
+        index = np.random.choice(list(population_normalize.keys()), p=chromosome_probab)
+        if population_normalize[index][0].time not in values or j > 10:
+            if population_normalize[index][1] == "p":
+                if(i < parents_number):
+                    i += 1
+                    j = 0
+                    values += [population_normalize[index][0].time]
+                    # Usunięcie indeksu z populacji i dodanie do rozwiązania osobnika z warstwy rodzicielskiej
+                    new_generation.append(population_normalize.pop(index)[0])
+            else:
+                values += [population_normalize[index][0].time]
+                j = 0
+                # Usunięcie indeksu z populacji i dodanie do rozwiązania osobnika z warstwy dzieci
+                new_generation.append(population_normalize.pop(index)[0])
+        else:
+            j += 1
     return new_generation
 
 
@@ -150,15 +149,24 @@ def children_selection_ranking(parents: list[Solution], childrens: list[Solution
     """
     # Określenie liczby osobników z pokolenia rodzicielskiego
     parents_number = math.ceil(population_size * max_parental_involvement / 100)
-    # Określenie liczby osobników z pokolenia dzieci
-    children_number = population_size - parents_number
 
+    parents = [('p', solution) for solution in parents]
+    childrens = [('c', solution) for solution in childrens]
+    population = parents + childrens
     #sortowanie
-    parents.sort(key=lambda solution: solution.time)
-    childrens.sort(key=lambda solution:solution.time)
+    population.sort(key=lambda tuple: tuple[1].time)
 
     # Tworzenie nowego pokolenia poprzez połączenie najlepszych rodziców i dzieci
-    new_generation = parents[:parents_number]+childrens[:children_number]
+    i = 0
+    new_generation = list()
+    for solution in population:
+        if solution[0] == 'p' and i <= parents_number:
+            i += 1
+            new_generation.append(solution[1])
+        elif solution[0] == 'c':
+            new_generation.append(solution[1])
+        if len(new_generation) == population_size:
+            break
 
     return new_generation
 
@@ -172,7 +180,8 @@ def calculate_chromosome_probabilities(population):
            list[float]: Lista prawdopodobieństw chromosomów.
        """
     # Znajdź minimalny czas wykonania i odejmij od niego stałą (żeby najlepsze osobniki miały większą szanse na rozmnożenie)
-    min_val = min(solution.time for solution in population)-100
+    #TODO
+    min_val = min(solution.time for solution in population)-300
     # Oblicz sumę odwrotności czasu wykonania (po odjęciu minimalnego czasu)
     sum_time_all = sum(1 / (solution.time-min_val) for solution in population)
     # Oblicz prawdopodobieństwo dla każdego chromosomu

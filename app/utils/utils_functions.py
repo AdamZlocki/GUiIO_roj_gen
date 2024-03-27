@@ -125,11 +125,13 @@ def plot_results(sheet_name: str, num_of_vehicles: int, algorithm: str, num_of_r
             from app.classes.selection import ParentSelection, ChildrenSelection
 
             start_time = time.time()
-            sol, bests = genetic_algorithm.genetic_algorithm(graph=graph, vehicles=vehicles, number_of_iterations=100,
-                                                             initial_population_size=20, population_size=10,
-                                                             parent_selection=ParentSelection.Roulette, children_selection=ChildrenSelection.Roulette,
-                                                             stop_count=50, mutation='1', mutation_probability=100,
-                                                             max_parental_involvement=50)
+            max_parental_involvement = 100
+            sol, bests = genetic_algorithm.genetic_algorithm(graph=graph, vehicles=vehicles, number_of_iterations=1000,
+                                                             initial_population_size=40, population_size=10,
+                                                             parent_selection=ParentSelection.Tournament,
+                                                             children_selection=ChildrenSelection.Ranking,
+                                                             stop_count=50, mutation='1', mutation_probability=10,
+                                                             max_parental_involvement=max_parental_involvement)
             end_time = time.time()
 
         times_measured.append(end_time - start_time)
